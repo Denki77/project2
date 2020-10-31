@@ -47,6 +47,7 @@ urlpatterns = [
     path('login', MyLoginView.as_view(), name='login'),
     path('logout', LogoutView.as_view(), name='logout'),
     path('register', MySignupView.as_view(), name='register'),
+
 ]
 
 if settings.DEBUG:
