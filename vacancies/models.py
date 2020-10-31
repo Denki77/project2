@@ -1,4 +1,8 @@
+from django.contrib.auth.models import User
 from django.db import models
+
+from project2.settings import MEDIA_COMPANY_IMAGE_DIR
+from project2.settings import MEDIA_SPECIALITY_IMAGE_DIR
 
 
 class SiteSettings(models.Model):
@@ -9,15 +13,16 @@ class SiteSettings(models.Model):
 class Companies(models.Model):
     name = models.CharField(max_length=255)
     location = models.CharField(max_length=64)
-    logo = models.CharField(max_length=255)
+    logo = models.ImageField(upload_to=MEDIA_COMPANY_IMAGE_DIR, default='no-image.png')
     description = models.TextField()
     employee_count = models.IntegerField()
+    owner = models.ForeignKey(User, related_name='owner', on_delete=models.CASCADE)
 
 
 class Speciality(models.Model):
     code = models.SlugField()
     title = models.CharField(max_length=255)
-    picture = models.CharField(max_length=64)
+    picture = models.ImageField(upload_to=MEDIA_SPECIALITY_IMAGE_DIR, default='no-image.png')
 
 
 class Vacancies(models.Model):
@@ -29,3 +34,11 @@ class Vacancies(models.Model):
     salary_min = models.IntegerField()
     salary_max = models.IntegerField()
     published_at = models.DateField()
+
+
+class Application(models.Model):
+    written_username = models.CharField(max_length=255)
+    written_phone = models.CharField(max_length=255)
+    written_cover_letter = models.TextField()
+    vacancy = models.ForeignKey(Vacancies, related_name='applications', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='applications', on_delete=models.CASCADE)

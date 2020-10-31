@@ -1,9 +1,14 @@
-from django.http import HttpResponseNotFound, HttpResponseServerError, Http404
-from django.shortcuts import render
+from django.contrib.auth.models import User
+from django.contrib.auth.views import LoginView
+from django.http import HttpResponseNotFound, HttpResponseServerError, Http404, HttpResponse
+from django.shortcuts import render, redirect
 
 from django.views import View
+from django.contrib.auth.forms import UserCreationForm
+from django.views.generic import CreateView
 
-from vacancies.models import Speciality, Companies, Vacancies, SiteSettings
+from vacancies.forms import ApplicationForm
+from vacancies.models import Speciality, Companies, Vacancies, SiteSettings, Application
 
 
 def custom_handler404(request, exception):
@@ -17,9 +22,12 @@ def custom_handler500(request):
 def get_config_dict():
     title = SiteSettings.objects.filter(key_settings='site_name').first()
     menu_title = SiteSettings.objects.filter(key_settings='menu_title').first()
+    user = User
     return {
         'title': title.value_settings,
         'menu_title': menu_title.value_settings,
+        'is_authenticated': user.is_authenticated,
+        'user_name': user.get_username,
     }
 
 
@@ -30,7 +38,7 @@ class MainView(View):
         return render(request, 'vacancies/index.html', context={
             'base_site_config': get_config_dict(),
             'list_of_specialty': list_of_specialty,
-            'list_of_company': list_of_company
+            'list_of_company': list_of_company,
         })
 
 
@@ -39,19 +47,101 @@ class VacanciesListView(View):
         list_of_specialty = Speciality.objects.all()
         return render(request, 'vacancies/vacancies.html', context={
             'base_site_config': get_config_dict(),
-            'list_of_specialty': list_of_specialty
+            'list_of_specialty': list_of_specialty,
         })
 
 
 class VacancyView(View):
+
+    def get_vacancy_data(self, vacancy_id):
+        return Vacancies.objects.filter(id=vacancy_id).first()
+
     def get(self, request, vacancy_id):
-        data_of_vacancy = Vacancies.objects.filter(id=vacancy_id).first()
+        data_of_vacancy = self.get_vacancy_data(vacancy_id)
+        application_form = ApplicationForm()
         if data_of_vacancy is None:
             raise Http404
         return render(request, 'vacancies/vacancy.html', context={
             'base_site_config': get_config_dict(),
-            'data_of_vacancy': data_of_vacancy
+            'data_of_vacancy': data_of_vacancy,
+            'form': application_form
         })
+
+
+class VacancyApplicationView(View):
+    def post(self, request, vacancy_id):
+
+        if not request.user.is_authenticated:
+            return redirect('/login')
+
+        application_form = ApplicationForm(request.POST)
+        if application_form.is_valid():
+            data = application_form.cleaned_data
+            data['vacancy'] = Vacancies.objects.get(id=vacancy_id)
+            data['user'] = User.objects.get(id=request.user.id)
+            Application(**data).save()
+            return redirect('/success')
+        else:
+            return redirect('/error')
+
+
+class MyCompanyView(View):
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return redirect('/login')
+
+        my_company_exist = False
+
+        data_about_company = {
+            'name': '',
+            'location': '',
+            'logo': '',
+            'description': '',
+            'employee_count': 0
+        }
+
+        list_of_company = Companies.objects.filter(owner_id=request.user.id)
+        if list_of_company.count() > 0:
+            data_about_company = list_of_company.first()
+            my_company_exist = True
+        elif "createNewCompany" in request.GET.keys():
+            print("createNewCompany")
+            Companies.objects.create(
+                name='',
+                location=' ',
+                logo='',
+                description='',
+                employee_count=1,
+                owner=User.objects.get(id=request.user.id),
+            )
+            data_about_company = Companies.objects.filter(owner_id=request.user.id).first()
+            my_company_exist = True
+        else:
+            print("nocompany")
+
+        return render(request, 'vacancies/mycompany.html', context={
+            'base_site_config': get_config_dict(),
+            'data_about_company': data_about_company,
+            'myCompanyExist': my_company_exist
+        })
+
+
+"""
+    def post(self, request):
+
+        if not request.user.is_authenticated:
+            return redirect('/login')
+
+        if application_form.is_valid():
+            data = application_form.cleaned_data
+            data['vacancy'] = Vacancies.objects.get(id=vacancy_id)
+            data['user'] = User.objects.get(id=request.user.id)
+            Application(**data).save()
+            return redirect('/success')
+        else:
+            return redirect('/error')
+
+"""
 
 
 class VacanciesListBySpecializationsView(View):
@@ -67,8 +157,10 @@ class VacanciesListBySpecializationsView(View):
 
 class CompaniesListView(View):
     def get(self, request):
+        list_of_company = Companies.objects.all()
         return render(request, 'vacancies/companies.html', context={
             'base_site_config': get_config_dict(),
+            'list_of_company': list_of_company,
         })
 
 
@@ -81,3 +173,30 @@ class CompanyView(View):
             'base_site_config': get_config_dict(),
             'data_of_company': data_of_company
         })
+
+
+class MySignupView(CreateView):
+    extra_context = {
+        'base_site_config': get_config_dict(),
+    }
+    form_class = UserCreationForm
+    success_url = 'login'
+    template_name = 'vacancies/register.html'
+
+
+class MyLoginView(LoginView):
+    extra_context = {
+        'base_site_config': get_config_dict(),
+    }
+    redirect_authenticated_user = True
+    template_name = 'vacancies/login.html'
+
+
+class SuccessView(View):
+    def get(self, request):
+        return HttpResponse("Успешно!")
+
+
+class ErrorView(View):
+    def get(self, request):
+        return HttpResponse("Что-то пошло не так(((!")

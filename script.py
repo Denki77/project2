@@ -2,11 +2,11 @@ import os
 import django
 import datetime
 
-from vacancies.models import Speciality, Companies, Vacancies, SiteSettings
-from vacancies.data import specialties, jobs, companies
-
 os.environ["DJANGO_SETTINGS_MODULE"] = 'project2.settings'
 django.setup()  # Всякие Django штуки импортим после сетапа
+
+from vacancies.models import Speciality, Companies, Vacancies, SiteSettings
+from vacancies.data import specialties, jobs, companies
 
 if __name__ == '__main__':
 

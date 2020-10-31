@@ -3,6 +3,24 @@
 {% block container %}
 
   <main class="container mt-3">
-    <h1>Здесь будут все компании</h1>
-  </main>
+    <section class="my-5 pt-3">
+      <h2 class="h2 font-weight-normal text-center mb-5">Компании, представленные на нашем сайте:</h2>
+      <div class="row mb-0">
+        {% for company in list_of_company %}
+
+        <div class="col-6 col-md-6 col-lg-3">
+          <div class="card pt-4 text-center mb-4">
+            <a href="#" style="max-width: 150px;" class="mx-auto d-block">
+              {% load static %}
+              <img class="mx-auto d-block mw-100" src="{{ company.logo.url }}" width="130" height="80" alt="">
+            </a>
+            <div class="card-body">
+              <p class="card-text"><a href="{% url 'company' company.id %}">{{ company.vacancies.count }} вакансий</a></p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+
+      </div>
+    </section>  </main>
 {% endblock %}

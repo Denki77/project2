@@ -1,0 +1,44 @@
+{% extends 'vacancies/base_template.html' %}
+
+{% block container %}
+  <main class="container">
+    <div class="row">
+      <div class="col-8 col-lg-4 offset-2 offset-lg-4">
+        <form class="form-signin pt-5" method="post" action="register">{% csrf_token %}
+          <div class="text-center mt-5 b-1">
+
+            <h1 class="h3 mb-3 font-weight-normal">{{ base_site_config.title }}</h1>
+            <p class="h5 font-weight-light">Создайте аккаунт</p>
+          </div>
+
+          <div class="mt-5 form-label-group">
+            <p class="text-muted">Логин</p>
+            <input type="text" name="username" autocomplete="username"
+                   id="id_username" class="form-control" required autofocus>
+            <label for="id_username"></label>
+          </div>
+
+          <div class="form-label-group">
+            <p class="text-muted"> Пароль</p>
+            <input type="password" name="password1" id="inputPassword" class="form-control"
+                   autocomplete="new-password" aria-autocomplete="list" required>
+            <label for="inputPassword"></label>
+          </div>
+
+          <div class="form-label-group">
+            <p class="text-muted"> Подтвердите пароль</p>
+            <input type="password" name="password2" id="inputPassword2" class="form-control" required>
+            <label for="inputPassword2"></label>
+          </div>
+          <div class="checkbox mb-3"></div>
+          <button class="btn btn-primary btn-lg btn-block" type="submit">Зарегистрироваться</button>
+        </form>
+
+         <div class="mt-4 text-center"><p>Есть аккаунт? <a href="/login">Войдите!</a></p></div>
+
+
+
+      </div>
+    </div>
+  </main>
+{% endblock %}
