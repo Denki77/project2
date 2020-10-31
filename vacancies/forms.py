@@ -16,4 +16,3 @@ class ApplicationForm(forms.Form):
         self.helper.add_input(Submit('submit', 'Откликнуться на вакансию'))
         self.helper.form_class = 'card mb-3 p-4'
         self.helper.label_class = 'mb-1 mt-2'
-        #self.helper.field_class = 'col-lg-8'
