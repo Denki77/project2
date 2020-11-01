@@ -110,7 +110,7 @@ class MyCompanyView(View):
             Companies.objects.create(
                 name='',
                 location=' ',
-                logo=MEDIA_COMPANY_IMAGE_DIR + 'no-image.png',
+                logo='no-image.png',
                 description='',
                 employee_count=1,
                 owner=User.objects.get(id=request.user.id),

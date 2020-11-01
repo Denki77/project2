@@ -19,10 +19,9 @@
             {% crispy form %}
       </div>
       {% else %}
-      <div class="row mt-5">
-        <h1>У вас не создано ни одной компании.</h1>
-        <br><br>
-        <a href="?createNewCompany" class="btn btn-info">Создать новую компанию</a>
+      <div class="row mt-5 text-center">
+        <h1 class="col-12">У вас не создано ни одной компании.</h1>
+        <a href="?createNewCompany" class="mt-5 margin-center btn btn-info">Создать новую компанию</a>
       </div>
       {% endif %}
     </section>
