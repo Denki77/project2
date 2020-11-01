@@ -22,7 +22,7 @@ from django.conf.urls.static import static
 
 from vacancies.views import MainView, custom_handler404, custom_handler500, VacanciesListView, VacancyView, \
     VacanciesListBySpecializationsView, CompaniesListView, CompanyView, MyLoginView, MySignupView, \
-    VacancyApplicationView, ErrorView, SuccessView, MyCompanyView, MyCompanyVacanciesListView
+    VacancyApplicationView, ErrorView, SuccessView, MyCompanyView, MyCompanyVacanciesListView, MyCompanyVacancyEditView
 
 handler404 = custom_handler404
 handler500 = custom_handler500
@@ -43,7 +43,7 @@ urlpatterns = [
 
     path('mycompany/', MyCompanyView.as_view(), name='my_company'),
     path('mycompany/vacancies/', MyCompanyVacanciesListView.as_view(), name='my_company_vacancies'),
-    path('mycompany/vacancies/<int:vacancy_id>', MyCompanyVacanciesListView.as_view(), name='my_company_vacancy'),
+    path('mycompany/vacancies/<int:vacancy_id>', MyCompanyVacancyEditView.as_view(), name='my_company_vacancy'),
 
     path('admin/', admin.site.urls),
     path('login', MyLoginView.as_view(), name='login'),

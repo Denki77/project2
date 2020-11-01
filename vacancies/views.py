@@ -7,8 +7,7 @@ from django.views import View
 from django.contrib.auth.forms import UserCreationForm
 from django.views.generic import CreateView
 
-from project2.settings import MEDIA_COMPANY_IMAGE_DIR
-from vacancies.forms import ApplicationForm, CompanyForm
+from vacancies.forms import ApplicationForm, CompanyForm, VacancyEditForm
 from vacancies.models import Speciality, Companies, Vacancies, SiteSettings, Application
 
 
@@ -168,6 +167,34 @@ class MyCompanyVacanciesListView(View):
             'data_of_my_company': data_of_my_company.first(),
         })
 
+
+class MyCompanyVacancyEditView(View):
+    def get(self, request, vacancy_id):
+        if not request.user.is_authenticated:
+            return redirect('/login')
+
+        data_of_one_vacancy = Vacancies.objects.filter(id=vacancy_id)
+        if data_of_one_vacancy.count() == 0:
+            return redirect('my_company_vacancies')
+
+        data_of_one_vacancy_first = data_of_one_vacancy.first()
+        vacancy_form = VacancyEditForm({
+            'id': data_of_one_vacancy_first.id,
+            'title': data_of_one_vacancy_first.title,
+            'specialty': data_of_one_vacancy_first.specialty.id,
+            'salary_min': data_of_one_vacancy_first.salary_min,
+            'salary_max': data_of_one_vacancy_first.salary_max,
+            'skills': data_of_one_vacancy_first.skills,
+            'description': data_of_one_vacancy_first.description,
+
+        })
+
+        return render(request, 'vacancies/vacancy-edit.html', context={
+            'base_site_config': get_config_dict(),
+            'data_of_one_vacancy': data_of_one_vacancy_first,
+            'form': vacancy_form,
+        })
+
     def post(self, request):
 
         if not request.user.is_authenticated:
@@ -236,10 +263,10 @@ class MyLoginView(LoginView):
 
 
 class SuccessView(View):
-    def get(self):
+    def get(self, request):
         return HttpResponse("Успешно!")
 
 
 class ErrorView(View):
-    def get(self):
+    def get(self, request):
         return HttpResponse("Что-то пошло не так(((!")

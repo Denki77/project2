@@ -1,3 +1,8 @@
+.backend-container{
+    background-color: #f6f2e6;
+    border-radius: 20px;
+    border: 1px solid #ecd9a1;
+}
 .margin-center{
     margin: 0 auto;
 }
