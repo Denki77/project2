@@ -1,0 +1,28 @@
+{% extends 'vacancies/base_template.html' %}
+
+{% block container %}
+  <main class="container mt-3 pb-5">
+    <div class="row mt-5">
+      <div class="col-12 col-lg-4">
+        <aside class="pt-3 pb-4 px-4 mb-5 card">
+          <h1 class="h4 pt-2 pb-2">Моя компания</h1>
+          <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+              {% url 'my_company' as my_company_url %}
+              {% url 'my_company_vacancies' as my_company_vacancies_url %}
+            <a class="nav-link {% if request.path == my_company_url %}active{% endif %}"
+               href="{{ my_company_url }}">1. Информация о&nbsp;компании</a>
+            <a class="nav-link {% if request.path == my_company_vacancies_url %}active{% endif %}"
+               href="{{ my_company_vacancies_url }}">2. Вакансии</a>
+          </div>
+        </aside>
+      </div>
+      <div class="col-12 col-lg-8">
+        <div class="card">
+          <div class="card-body px-4 pb-4">
+    {% block sub_container %} {% endblock %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+{% endblock %}

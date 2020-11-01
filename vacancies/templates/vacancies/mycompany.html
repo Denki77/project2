@@ -1,13 +1,9 @@
-{% extends 'vacancies/base_template.html' %}
+{% extends 'vacancies/base_template_backend.html' %}
 
-{% block container %}
+{% block sub_container %}
 {% load crispy_forms_tags %}
 
-  <main class="container mt-3">
-    <div class="navbar mt-5">
-      <p><a href="#" onclick="history.back(); return false;">Назад</a></p>
-    </div>
-    <section>
+  <section class="tab-pane fade show active">
       {% if myCompanyExist %}
       <div class="text-center">
         <img src="{{ data_about_company.logo.url }}" width="130" height="80" alt="">
@@ -24,6 +20,5 @@
         <a href="?createNewCompany" class="mt-5 margin-center btn btn-info">Создать новую компанию</a>
       </div>
       {% endif %}
-    </section>
-  </main>
+  </section>
 {% endblock %}

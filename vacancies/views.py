@@ -148,11 +148,43 @@ class MyCompanyView(View):
             if data_for_save['logo'] is None:
                 data_for_save['logo'] = Companies.objects.get(id=data_for_save['id']).logo
             print(data_for_save['logo'])
-            # data_for_save['id'] = Companies.objects.filter(owner_id=request.user.id).first().id
             data_for_save['owner'] = User.objects.get(id=request.user.id)
             Companies(**data_for_save).save()
 
         return redirect('my_company')
+
+
+class MyCompanyVacanciesListView(View):
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return redirect('/login')
+
+        data_of_my_company = Companies.objects.filter(owner_id=request.user.id)
+        if data_of_my_company.count() == 0:
+            return redirect('my_company')
+
+        return render(request, 'vacancies/vacancy-list.html', context={
+            'base_site_config': get_config_dict(),
+            'data_of_my_company': data_of_my_company.first(),
+        })
+
+    def post(self, request):
+
+        if not request.user.is_authenticated:
+            return redirect('/login')
+
+        company_form = CompanyForm(request.POST, request.FILES)
+        print(company_form['location'])
+        if company_form.is_valid():
+            data_for_save = company_form.cleaned_data
+            if data_for_save['logo'] is None:
+                data_for_save['logo'] = Companies.objects.get(id=data_for_save['id']).logo
+            print(data_for_save['logo'])
+            # data_for_save['id'] = Companies.objects.filter(owner_id=request.user.id).first().id
+            data_for_save['owner'] = User.objects.get(id=request.user.id)
+            Companies(**data_for_save).save()
+
+        return redirect('my_company_vacancies')
 
 
 class VacanciesListBySpecializationsView(View):
