@@ -7,7 +7,8 @@ from django.views import View
 from django.contrib.auth.forms import UserCreationForm
 from django.views.generic import CreateView
 
-from vacancies.forms import ApplicationForm
+from project2.settings import MEDIA_COMPANY_IMAGE_DIR
+from vacancies.forms import ApplicationForm, CompanyForm
 from vacancies.models import Speciality, Companies, Vacancies, SiteSettings, Application
 
 
@@ -76,13 +77,13 @@ class VacancyApplicationView(View):
 
         application_form = ApplicationForm(request.POST)
         if application_form.is_valid():
-            data = application_form.cleaned_data
-            data['vacancy'] = Vacancies.objects.get(id=vacancy_id)
-            data['user'] = User.objects.get(id=request.user.id)
-            Application(**data).save()
+            data_for_save = application_form.cleaned_data
+            data_for_save['vacancy'] = Vacancies.objects.get(id=vacancy_id)
+            data_for_save['user'] = User.objects.get(id=request.user.id)
+            Application(**data_for_save).save()
             return redirect('/success')
         else:
-            return redirect('/error')
+            application_form.add_error('written_username', 'Use YYYY/MM/DD format')
 
 
 class MyCompanyView(View):
@@ -93,9 +94,9 @@ class MyCompanyView(View):
         my_company_exist = False
 
         data_about_company = {
-            'name': '',
+            'name': '0',
             'location': '',
-            'logo': '',
+            'logo': 'no-image.png',
             'description': '',
             'employee_count': 0
         }
@@ -109,39 +110,49 @@ class MyCompanyView(View):
             Companies.objects.create(
                 name='',
                 location=' ',
-                logo='',
+                logo=MEDIA_COMPANY_IMAGE_DIR + 'no-image.png',
                 description='',
                 employee_count=1,
                 owner=User.objects.get(id=request.user.id),
             )
             data_about_company = Companies.objects.filter(owner_id=request.user.id).first()
             my_company_exist = True
-        else:
-            print("nocompany")
 
-        return render(request, 'vacancies/mycompany.html', context={
+        context = {
             'base_site_config': get_config_dict(),
             'data_about_company': data_about_company,
-            'myCompanyExist': my_company_exist
-        })
+            'myCompanyExist': my_company_exist,
+        }
 
+        if my_company_exist:
+            context['form'] = CompanyForm({
+                'id': data_about_company.id,
+                'name': data_about_company.name,
+                'location': data_about_company.location,
+                'logo': data_about_company.logo,
+                'description': data_about_company.description,
+                'employee_count': data_about_company.employee_count
+            })
 
-"""
+        return render(request, 'vacancies/mycompany.html', context=context)
+
     def post(self, request):
 
         if not request.user.is_authenticated:
             return redirect('/login')
 
-        if application_form.is_valid():
-            data = application_form.cleaned_data
-            data['vacancy'] = Vacancies.objects.get(id=vacancy_id)
-            data['user'] = User.objects.get(id=request.user.id)
-            Application(**data).save()
-            return redirect('/success')
-        else:
-            return redirect('/error')
+        company_form = CompanyForm(request.POST, request.FILES)
+        print(company_form['location'])
+        if company_form.is_valid():
+            data_for_save = company_form.cleaned_data
+            if data_for_save['logo'] is None:
+                data_for_save['logo'] = Companies.objects.get(id=data_for_save['id']).logo
+            print(data_for_save['logo'])
+            # data_for_save['id'] = Companies.objects.filter(owner_id=request.user.id).first().id
+            data_for_save['owner'] = User.objects.get(id=request.user.id)
+            Companies(**data_for_save).save()
 
-"""
+        return redirect('my_company')
 
 
 class VacanciesListBySpecializationsView(View):
@@ -193,10 +204,10 @@ class MyLoginView(LoginView):
 
 
 class SuccessView(View):
-    def get(self, request):
+    def get(self):
         return HttpResponse("Успешно!")
 
 
 class ErrorView(View):
-    def get(self, request):
+    def get(self):
         return HttpResponse("Что-то пошло не так(((!")
