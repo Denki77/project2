@@ -1,4 +1,3 @@
-from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
 from django.http import HttpResponseNotFound, HttpResponseServerError, Http404, HttpResponse
@@ -183,7 +182,9 @@ class MyCompanyVacancyEditView(View):
                 skills='',
                 company=Companies.objects.filter(owner_id=request.user.id).first(),
             )
-            vacancy_id = Vacancies.objects.filter(company=Companies.objects.filter(owner_id=request.user.id).first()).last().id
+            vacancy_id = Vacancies.objects.filter(
+                company=Companies.objects.filter(
+                    owner_id=request.user.id).first()).last().id
 
         data_of_one_vacancy = Vacancies.objects.filter(id=vacancy_id)
         if data_of_one_vacancy.count() == 0:
