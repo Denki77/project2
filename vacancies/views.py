@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
 from django.http import HttpResponseNotFound, HttpResponseServerError, Http404, HttpResponse
@@ -105,7 +106,6 @@ class MyCompanyView(View):
             data_about_company = list_of_company.first()
             my_company_exist = True
         elif "createNewCompany" in request.GET.keys():
-            print("createNewCompany")
             Companies.objects.create(
                 name='',
                 location=' ',
@@ -173,11 +173,24 @@ class MyCompanyVacancyEditView(View):
         if not request.user.is_authenticated:
             return redirect('/login')
 
+        if vacancy_id == 0:
+            Vacancies.objects.create(
+                title='Новая вакансия',
+                specialty=Speciality.objects.filter().first(),
+                salary_min=0,
+                salary_max=0,
+                description='',
+                skills='',
+                company=Companies.objects.filter(owner_id=request.user.id).first(),
+            )
+            vacancy_id = Vacancies.objects.filter(company=Companies.objects.filter(owner_id=request.user.id).first()).last().id
+
         data_of_one_vacancy = Vacancies.objects.filter(id=vacancy_id)
         if data_of_one_vacancy.count() == 0:
             return redirect('my_company_vacancies')
 
         data_of_one_vacancy_first = data_of_one_vacancy.first()
+
         vacancy_form = VacancyEditForm({
             'id': data_of_one_vacancy_first.id,
             'title': data_of_one_vacancy_first.title,
@@ -186,7 +199,6 @@ class MyCompanyVacancyEditView(View):
             'salary_max': data_of_one_vacancy_first.salary_max,
             'skills': data_of_one_vacancy_first.skills,
             'description': data_of_one_vacancy_first.description,
-
         })
 
         return render(request, 'vacancies/vacancy-edit.html', context={
@@ -195,23 +207,27 @@ class MyCompanyVacancyEditView(View):
             'form': vacancy_form,
         })
 
-    def post(self, request):
+    def post(self, request, vacancy_id):
 
         if not request.user.is_authenticated:
             return redirect('/login')
 
-        company_form = CompanyForm(request.POST, request.FILES)
-        print(company_form['location'])
-        if company_form.is_valid():
-            data_for_save = company_form.cleaned_data
-            if data_for_save['logo'] is None:
-                data_for_save['logo'] = Companies.objects.get(id=data_for_save['id']).logo
-            print(data_for_save['logo'])
-            # data_for_save['id'] = Companies.objects.filter(owner_id=request.user.id).first().id
-            data_for_save['owner'] = User.objects.get(id=request.user.id)
-            Companies(**data_for_save).save()
+        data_of_my_company = Companies.objects.filter(owner_id=request.user.id)
+        if data_of_my_company.count() == 0:
+            return redirect('my_company')
 
-        return redirect('my_company_vacancies')
+        vacancy_form = VacancyEditForm(request.POST)
+        if vacancy_form.is_valid():
+            data_for_save = vacancy_form.cleaned_data
+            data_for_save['company'] = data_of_my_company.first()
+            data_for_save['specialty'] = Speciality.objects.get(id=data_for_save['specialty'])
+
+            Vacancies(**data_for_save).save()
+
+            if vacancy_id == 0:
+                vacancy_id = data_for_save['id']
+
+        return redirect('my_company_vacancy', vacancy_id)
 
 
 class VacanciesListBySpecializationsView(View):

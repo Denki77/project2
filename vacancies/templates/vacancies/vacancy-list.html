@@ -2,7 +2,8 @@
 
 {% block sub_container %}
             <section class="tab-pane fade show active">
-              <h2 class="h4 pt-2 pb-3">Вакансии</h2>
+              <h2 class="h4 pt-2">Вакансии </h2>
+              <small><a href="{% url 'my_company_vacancy' 0 %}">Создать новую вакансию</a> </small>
               <div class="row mt-5">
                 <div class="col-12 m-auto">
                   {% for vacancy in data_of_my_company.vacancies.all %}

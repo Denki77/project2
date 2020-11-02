@@ -3,8 +3,7 @@
 {% block sub_container %}
 {% load crispy_forms_tags %}
             <section>
-              <h2 class="h4 pt-2 pb-3">Backend Middle/Senior</h2>
-              <p class="alert alert-info" role="alert">Вакансия обновлена</p>
+              <h2 class="h4 pt-2 pb-3">{{ data_of_one_vacancy.title }}</h2>
               {% crispy form %}
               <!-- END Vacancy info -->
               <!-- Applications -->
